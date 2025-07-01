@@ -1,36 +1,47 @@
 import { useContext } from 'react';
-import { TodoDispatchContext } from '../App';
-import './TodoList.css'
-import Button from './Button';
+import { TodoDispatchContext } from '../hoc/TodoContext'
+import TodoButton from './TodoButton';
+import { Checkbox, ListItem, ListItemIcon, ListItemButton, ListItemText } from '@mui/material';
 
-const TodoList = () => {
-    const {todos, handleUpdate} = useContext(TodoDispatchContext);
+const TodoList = ({ filteredTodos }) => {
+    const {handleUpdate, handleDelete } = useContext(TodoDispatchContext);
 
     const handleChangeCheckbox = (item) => {
         handleUpdate({
             ...item,
-            completed: !item.completed
+            completed: !item.completed,
         })
     }
 
+    const onDelete = (e, item) => {
+        e.stopPropagation()
+        handleDelete(item.id)
+    }
+
     return (
-        <ul className="todo-list">
-            {todos.map((item) => (
-                <li key={item.id}
-                    className="todo-item">
-                    <input
-                        id={`todo_${item.id}`}
-                        type="checkbox"
-                        onChange={() => handleChangeCheckbox(item)}
-                        checked={item.completed}
-                        />
-                    <label className={`todo-text ${item.completed && 'completed'}`}
-                        for={`todo_${item.id}`}>{item.text}</label>
-                    <Button className="delete-button" text="삭제" />
-                </li>
+        <>
+            {filteredTodos.map((item) => (
+                <ListItem
+                    key={item.id}
+                    >
+                    <ListItemButton role={undefined} onClick={() => handleChangeCheckbox(item)} dense>
+                        <ListItemIcon>
+                            <Checkbox
+                                edge="start"
+                                checked={item.completed}
+                                tabIndex={-1}
+                                disableRipple
+                                />
+                        </ListItemIcon>
+                        <ListItemText primary={item.text}/>
+                    </ListItemButton>
+                    <TodoButton text="삭제" type="WARNING" onClick={(e) => onDelete(e, item)} />
+                </ListItem>
             ))}
-        </ul>
+        </>
+        
     );
 };
 
 export default TodoList;
+
